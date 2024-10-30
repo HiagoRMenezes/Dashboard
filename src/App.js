@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import {Routes, Route} from "react-router-dom";
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
 import Dashboard from "./scenes/dashboard";
@@ -15,37 +15,52 @@ import Geography from "./scenes/geography";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import Calendar from "./scenes/calendar/calendar";
+import Criatives from "./scenes/criativos";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Login from "./scenes/login";
 
 function App() {
-  const [theme, colorMode] = useMode();
-  const [isSidebar, setIsSidebar] = useState(true);
+    const [theme, colorMode] = useMode();
+    const [isSidebar, setIsSidebar] = useState(true);
 
-  return (
-    <ColorModeContext.Provider value={colorMode}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <div className="app">
-          <Sidebar isSidebar={isSidebar} />
-          <main className="content">
-            <Topbar setIsSidebar={setIsSidebar} />
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/team" element={<Team />} />
-              <Route path="/contacts" element={<Contacts />} />
-              <Route path="/invoices" element={<Invoices />} />
-              <Route path="/form" element={<Form />} />
-              <Route path="/bar" element={<Bar />} />
-              <Route path="/pie" element={<Pie />} />
-              <Route path="/line" element={<Line />} />
-              <Route path="/faq" element={<FAQ />} />
-              <Route path="/calendar" element={<Calendar />} />
-              <Route path="/geography" element={<Geography />} />
-            </Routes>
-          </main>
-        </div>
-      </ThemeProvider>
-    </ColorModeContext.Provider>
-  );
+    return (
+            <ColorModeContext.Provider value={colorMode}>
+                <ThemeProvider theme={theme}>
+                    <CssBaseline />
+                    <Routes>
+                        <Route path="/login" element={<Login />} />
+                        <Route
+                            path="/*"
+                            element={
+                                <ProtectedRoute>
+                    <div className="app">
+                        <Sidebar isSidebar={isSidebar} />
+                        <main className="content">
+
+                            <Topbar setIsSidebar={setIsSidebar} />
+                            <Routes>
+                                <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                                    <Route path="/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
+                                    <Route path="/contacts" element={<ProtectedRoute><Contacts /></ProtectedRoute>} />
+                                    <Route path="/criatives" element={<ProtectedRoute><Criatives /></ProtectedRoute>} />
+                                    <Route path="/invoices" element={<ProtectedRoute><Invoices /></ProtectedRoute>} />
+                                    <Route path="/form" element={<ProtectedRoute><Form /></ProtectedRoute>} />
+                                    <Route path="/bar" element={<ProtectedRoute><Bar /></ProtectedRoute>} />
+                                    <Route path="/pie" element={<ProtectedRoute><Pie /></ProtectedRoute>} />
+                                    <Route path="/line" element={<ProtectedRoute><Line /></ProtectedRoute>} />
+                                    <Route path="/faq" element={<ProtectedRoute><FAQ /></ProtectedRoute>} />
+                                    <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
+                                    <Route path="/geography" element={<ProtectedRoute><Geography /></ProtectedRoute>} />
+                                    </Routes>
+                        </main>
+                    </div>
+                                </ProtectedRoute>
+                            }
+                        />
+                    </Routes>
+                </ThemeProvider>
+            </ColorModeContext.Provider>
+    );
 }
 
 export default App;
