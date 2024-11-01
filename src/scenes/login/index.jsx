@@ -9,18 +9,9 @@ const Login = () => {
     const dispatch = useDispatch();
     const { loading, error, token } = useSelector((state) => state.auth);
 
-    const FIXED_EMAIL = "hiago@gmail.com"; // Email fixo
-    const FIXED_PASSWORD = "123456"; // Senha fixa
-    const FIXED_TOKEN = "token-fixo-para-desenvolvimento"; // Use um token fixo para testes
-
-const handleSubmit = (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        // Verificar credenciais fixas
-        if (email === FIXED_EMAIL && password === FIXED_PASSWORD) {
-            dispatch({ type: 'LOGIN_SUCCESS', payload: { token: FIXED_TOKEN } });
-        } else {
-            dispatch({ type: 'LOGIN_FAILURE', payload: 'Email ou senha incorretos' });
-        }
+        dispatch({ type: 'LOGIN_REQUEST', payload: { email, password } });
     };
 
     // Redirecionar após o login
