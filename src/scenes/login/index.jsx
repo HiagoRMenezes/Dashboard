@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import {Navigate, } from 'react-router-dom';
 import {Box, Card, CardActions, CardContent, CircularProgress} from "@mui/material";
 
 const Login = () => {
@@ -16,7 +16,7 @@ const Login = () => {
 
     // Redirecionar após o login
     if (token) {
-        return <Link to={'/dashboard'} />;
+        return (<Navigate to={'/'} />);
     }
 
     return (
