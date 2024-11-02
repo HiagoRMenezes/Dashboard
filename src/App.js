@@ -18,6 +18,7 @@ import Calendar from "./scenes/calendar/calendar";
 import Criatives from "./scenes/criativos";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./scenes/login";
+import ForgotPasswordPage from "./scenes/forgotPassword";
 
 function App() {
     const [theme, colorMode] = useMode();
@@ -29,6 +30,7 @@ function App() {
                     <CssBaseline />
                     <Routes>
                         <Route path="/login" element={<Login />} />
+                        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                         <Route
                             path="/*"
                             element={

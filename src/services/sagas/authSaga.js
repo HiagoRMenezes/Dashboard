@@ -4,13 +4,29 @@ import {
     VALIDATE_TOKEN_REQUEST,
     VALIDATE_TOKEN_SUCCESS,
     VALIDATE_TOKEN_FAILURE,
-    LOGIN_SUCCESS, LOGIN_FAILURE, LOGIN_REQUEST
+    LOGIN_SUCCESS, LOGIN_FAILURE, LOGIN_REQUEST, REQUEST_PASSWORD_RESET
 } from '../types/actionTypes';
+import {passwordResetFailure, passwordResetSuccess} from "../creators/actionCreators";
 // import { validateTokenApi } from './api';
 
 // Helper para pegar o token do Redux state
 const getToken = (state) => state.auth.token;
 
+function* handlePasswordReset(action) {
+    try {
+        // Substitua com a chamada para sua API de recuperação de senha
+        const response = '';
+        // const response = yield call(apiRequestPasswordReset, action.payload.email);
+
+        if (response.success) {
+            yield put(passwordResetSuccess());
+        } else {
+            yield put(passwordResetFailure('Erro ao enviar o email de recuperação.'));
+        }
+    } catch (error) {
+        yield put(passwordResetFailure(error.message));
+    }
+}
 
 function* loginSaga(action) {
     try {
@@ -63,4 +79,5 @@ function* validateTokenSaga() {
 export function* authSaga() {
     yield takeLatest(LOGIN_REQUEST, loginSaga);
     yield takeLatest(VALIDATE_TOKEN_REQUEST, validateTokenSaga);
+    yield takeLatest(REQUEST_PASSWORD_RESET, handlePasswordReset);
 }

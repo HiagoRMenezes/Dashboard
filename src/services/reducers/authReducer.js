@@ -32,6 +32,12 @@ const authReducer = (state = initialState, action) => {
                 ...state,
                 isTokenValidated: true,  // Define como validado
             };
+        case 'REQUEST_PASSWORD_RESET':
+            return { ...state, loading: true, error: null, success: false };
+        case 'PASSWORD_RESET_SUCCESS':
+            return { ...state, loading: false, success: true };
+        case 'PASSWORD_RESET_FAILURE':
+            return { ...state, loading: false, error: action.payload.error };
         case VALIDATE_TOKEN_FAILURE:
             return {
                 ...state,

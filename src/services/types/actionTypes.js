@@ -11,3 +11,7 @@ export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';  // Dispara quando o login é bem-
 export const LOGIN_FAILURE = 'LOGIN_FAILURE';  // Dispara quando o login falha
 
 export const LOGOUT = 'LOGOUT';  // Dispara quando o logout é solicitado
+
+export const REQUEST_PASSWORD_RESET = 'REQUEST_PASSWORD_RESET';
+export const PASSWORD_RESET_SUCCESS = 'PASSWORD_RESET_SUCCESS';
+export const PASSWORD_RESET_FAILURE = 'PASSWORD_RESET_FAILURE';

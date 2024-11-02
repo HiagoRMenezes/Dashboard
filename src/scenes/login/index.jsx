@@ -19,6 +19,10 @@ const Login = () => {
         return (<Navigate to={'/'} />);
     }
 
+    const handleForgotPassword = () => {
+        return (<Navigate to={'/forgot-password'}/>);
+    }
+
     return (
         <Box style={{
             background: `linear-gradient(#290077, #290077, #290077, #FF4D00FF)`}}  width='100vw' height='100vh' display='flex' alignItems='center' justifyContent='center' >
@@ -55,6 +59,7 @@ const Login = () => {
                         {loading ? <CircularProgress variant='indeterminate' color='inherit' size={20} /> : 'Entrar'}
                     </button>
                     {error && <p style={{ color: 'red' }}>{error}</p>}
+                    <button onClick={handleForgotPassword}>Esqueci minha Senha</button>
                 </CardActions>
             </form>
         </div>
