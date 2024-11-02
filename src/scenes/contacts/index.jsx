@@ -1,258 +1,234 @@
 import {
-    Box,
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    IconButton, Stack, TextField
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Stack,
+  TextField,
+  Typography,
+  Chip
 } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
-import { mockDataContacts } from "../../data/mockData";
 import Header from "../../components/Header";
 import { useTheme } from "@mui/material";
-import {useState} from "react";
+import { useState } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 
 const Contacts = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [openDelete, setOpenDelete] = useState(false);
   const [open, setOpen] = useState(false);
-  let user = useState()
+  const [metricsList, setMetricsList] = useState([]);
+  const [isActive, setIsActive] = useState(true);
+  const [selectedMetric, setSelectedMetric] = useState(null); // Para armazenar a métrica selecionada para edição
+  const [formData, setFormData] = useState({
+    valorGasto: '',
+    visitaPerfil: '',
+    comenzarSeguir: '',
+    whatsappCliques: '',
+    custoPorClique: '0',
+    custoPorConversa: '0',
+    custoPorSeguidor: '0',
+    conversaoPerfil: '0'
+  });
+  const [image, setImage] = useState(null);
+  const [name, setName] = useState('');
 
-  const handleCloseDelete = async (props) => {
-       setOpenDelete(false);
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedMetric(null);
+    resetForm();
+  };
 
+  const handleClickOpen = (metric = null) => {
+    if (metric) {
+      setFormData(metric);
+      setImage(metric.image);
+      setName(metric.nome);
+      setIsActive(metric.estado === "Ativo");
+      setSelectedMetric(metric);
+    }
+    setOpen(true);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const calculateValues = (newData) => {
+    const vg = parseFloat(newData.valorGasto) || 0;
+    const vp = parseFloat(newData.visitaPerfil) || 0;
+    const cs = parseFloat(newData.comenzarSeguir) || 0;
+    const wa = parseFloat(newData.whatsappCliques) || 0;
+
+    return {
+      ...newData,
+      custoPorClique: vp > 0 ? (vg / vp).toFixed(2) : '0',
+      custoPorConversa: wa > 0 ? (vg / wa).toFixed(2) : '0',
+      custoPorSeguidor: cs > 0 ? (vg / cs).toFixed(2) : '0',
+      conversaoPerfil: vp > 0 ? ((wa / vp) * 100).toFixed(2) : '0'
+    };
+  };
+
+  const handleInputChange = (field, value) => {
+    const newData = { ...formData, [field]: value };
+    const calculatedData = calculateValues(newData);
+    setFormData(calculatedData);
+  };
+
+  const resetForm = () => {
+    setFormData({
+      valorGasto: '',
+      visitaPerfil: '',
+      comenzarSeguir: '',
+      whatsappCliques: '',
+      custoPorClique: '0',
+      custoPorConversa: '0',
+      custoPorSeguidor: '0',
+      conversaoPerfil: '0'
+    });
+    setImage(null);
+    setName('');
+    setIsActive(true);
+  };
+
+  const handleSave = () => {
+    const metricData = {
+      ...formData,
+      id: selectedMetric ? selectedMetric.id : metricsList.length + 1,
+      nome: name,
+      estado: isActive ? "Ativo" : "Inativo",
+      image: image
     };
 
-  const handleClickOpenDelete = async (props) => {
-       setOpenDelete(true);
-    };
-
-  const handleClose = async (props) => {
-       setOpen(false);
-
-    };
-
-  const handleClickOpen = async (props) => {
-       setOpen(true);
-    };
-
-
-    function _Change(campo, value) {
-        switch (campo) {
-            case "NM_USUARIO":
-                user.NM_USUARIO = value;
-
-                console.log("SETA NM USER");
-                break;
-
-            case "DM_EMAIL_USUARIO":
-                user.DM_EMAIL_USUARIO = value
-
-
-                console.log("SETA DM_EMAIL_USUARIO");
-                console.log(user.DM_EMAIL_USUARIO);
-                break;
-
-            case "DS_SENHA_USUARIO":
-                user.DS_SENHA_USUARIO = value;
-
-                console.log("SETA DS_SENHA_USUARIO");
-                break;
-
-            case "NR_CONTRATO":
-                user.NR_CONTRATO= value;
-
-
-                console.log("SETA NR_CONTRATO");
-                break;
-
-        }
+    if (selectedMetric) {
+      // Atualiza uma métrica existente
+      setMetricsList(metricsList.map(metric => (metric.id === selectedMetric.id ? metricData : metric)));
+    } else {
+      // Adiciona uma nova métrica
+      setMetricsList([...metricsList, metricData]);
     }
 
+    handleClose();
+  };
+
+  const handleDelete = (id) => {
+    setMetricsList(metricsList.filter(metric => metric.id !== id));
+  };
+
   const columns = [
-    { field: "id", headerName: "ID", flex: 0.5 },
-    { field: "registrarId", headerName: "Registrar ID" },
+    { field: "nome", headerName: "Nome", flex: 1 },
+    { field: "valorGasto", headerName: "Valor Gasto", flex: 1 },
+    { field: "visitaPerfil", headerName: "Visitas no Perfil", flex: 1 },
+    { field: "comenzarSeguir", headerName: "Começar a Seguir", flex: 1 },
+    { field: "whatsappCliques", headerName: "Cliques no WhatsApp", flex: 1 },
+    { field: "custoPorClique", headerName: "Custo por Clique", flex: 1 },
+    { field: "custoPorConversa", headerName: "Custo por Conversa", flex: 1 },
+    { field: "custoPorSeguidor", headerName: "Custo por Seguidor", flex: 1 },
+    { field: "conversaoPerfil", headerName: "Conversão Perfil > Conversa (%)", flex: 1 },
     {
-      field: "name",
-      headerName: "Name",
+      field: "estado",
+      headerName: "Estado",
       flex: 1,
-      cellClassName: "name-column--cell",
+      renderCell: (params) => (
+        <Chip label={params.value} color={params.value === "Ativo" ? "success" : "error"} />
+      ),
     },
     {
-      field: "age",
-      headerName: "Age",
-      type: "number",
-      headerAlign: "left",
-      align: "left",
-    },
-    {
-      field: "phone",
-      headerName: "Phone Number",
-      flex: 1,
-    },
-    {
-      field: "email",
-      headerName: "Email",
-      flex: 1,
-    },
-    {
-      field: "address",
-      headerName: "Address",
-      flex: 1,
-    },
-    {
-      field: "city",
-      headerName: "City",
-      flex: 1,
-    },
-    {
-      field: "zipCode",
-      headerName: "Zip Code",
-      flex: 1,
+      field: "actions",
+      headerName: "Ações",
+      flex: 0.5,
+      renderCell: (params) => (
+        <Stack direction="row" spacing={1}>
+          <Button onClick={() => handleClickOpen(params.row)}>Editar</Button>
+          <IconButton onClick={() => handleDelete(params.row.id)}>
+            <DeleteIcon />
+          </IconButton>
+        </Stack>
+      ),
     },
   ];
 
   return (
     <Box m="20px">
-      <Header
-        title="CONTACTS"
-        subtitle="List of Contacts for Future Reference"
-      />
-      <Box
-        m="40px 0 0 0"
-        height="75vh"
-        sx={{
-          "& .MuiDataGrid-root": {
-            border: "none",
-          },
-          "& .MuiDataGrid-cell": {
-            borderBottom: "none",
-          },
-          "& .name-column--cell": {
-            color: colors.greenAccent[300],
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: colors.blueAccent[700],
-            borderBottom: "none",
-          },
-          "& .MuiDataGrid-virtualScroller": {
-            backgroundColor: colors.primary[400],
-          },
-          "& .MuiDataGrid-footerContainer": {
-            borderTop: "none",
-            backgroundColor: colors.blueAccent[700],
-          },
-          "& .MuiCheckbox-root": {
-            color: `${colors.greenAccent[200]} !important`,
-          },
-          "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-            color: `${colors.grey[100]} !important`,
-          },
-        }}
-      >
-          <Stack direction="row" spacing={1}>
-              <IconButton aria-label="add" onClick={handleClickOpen}>
-                  <AddIcon/>
-              </IconButton>
-              {/*<IconButton aria-label="edit" onClick={handleClickOpenEdit}>*/}
-              {/*    <EditIcon/>*/}
-              {/*</IconButton>*/}
-              <IconButton aria-label="delete" onClick={handleClickOpenDelete}>
-                  <DeleteIcon/>
-              </IconButton>
-          </Stack>
+      <Header title="MÉTRICAS DE MARKETING" subtitle="Gerenciamento de Métricas de Marketing" />
+      <Box m="40px 0 0 0" height="75vh">
+        <Stack direction="row" spacing={1}>
+          <IconButton aria-label="add" onClick={() => handleClickOpen()}>
+            <AddIcon />
+          </IconButton>
+        </Stack>
+
         <DataGrid
-          rows={mockDataContacts}
+          rows={metricsList}
           columns={columns}
           components={{ Toolbar: GridToolbar }}
+          pageSize={5}
+          onRowClick={(params) => handleClickOpen(params.row)}
         />
-          <Dialog open={open} onClose={handleClose}>
-              <DialogTitle>Tela de cadastro</DialogTitle>
-              <DialogContent>
-                  <Box
-                      component="form"
-                      sx={{
-                          '& .MuiTextField-root': {m: 1, width: '25ch'},
-                      }}
-                      noValidate
-                      autoComplete="off"
-                  >
-                      <div>
-                          <TextField
-                              required
-                              id="ID_USUARIO"
-                              label="ID de Usuário"
-                              value={user.ID_USUARIO}
-                              disabled
-                              onChange={(event) => _Change("ID_USUARIO", event.target.value)}
-                          />
-                          <TextField
-                              required
-                              id="NM_USUARIO"
-                              label="Nome de Usuário"
-                              value={user.NM_USUARIO}
-                              onChange={(event) => _Change("NM_USUARIO", event.target.value)}
-                              // disabled = {edita}
-                          />
-                          <TextField
-                              required
-                              id="DM_EMAIL_USUARIO"
-                              label="Email de usuário"
-                              value={user.DM_EMAIL_USUARIO}
-                              onChange={(event) => _Change("DM_EMAIL_USUARIO", event.target.value)}
-                          />
-                          <TextField
-                              required
-                              id="DS_SENHA_USUARIO"
-                              label="Senha de usuário"
-                              value={user.DS_SENHA_USUARIO}
-                              type="password"
-                              autoComplete="on"
-                              onChange={(event) => _Change("DS_SENHA_USUARIO", event.target.value)}
-                          />
-                          <TextField
-                              required
-                              id="NR_CONTRATO"
-                              label="NR de Contrato"
-                              value={user.NR_CONTRATO}
-                              onChange={(event) => _Change("NR_CONTRATO", event.target.value)}
-                              disabled
-                          />
-                      </div>
-                  </Box>
-              </DialogContent>
-              <DialogActions>
-                  <Button onClick={handleClose}>Cancel</Button>
-                  <Button onClick={handleClose}>Salvar</Button>
-              </DialogActions>
-          </Dialog>
-          <Dialog
-              open={openDelete}
-              onClose={handleCloseDelete}
-              aria-labelledby="alert-dialog-title"
-              aria-describedby="alert-dialog-description"
-          >
-              <DialogTitle id="alert-dialog-title">
-                  {"Tela de usuário"}
-              </DialogTitle>
-              <DialogContent>
-                  <DialogContentText id="alert-dialog-description">
-                      Você tem certeza que deseja remover este usuário?
-                  </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                  <Button onClick={handleCloseDelete}>Cancelar</Button>
-                  <Button onClick={handleCloseDelete} autoFocus>
-                      Confirmar
-                  </Button>
-              </DialogActions>
-          </Dialog>
+
+        {/* Modal de Cadastro */}
+        <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+          <DialogTitle>Cadastro de Métricas</DialogTitle>
+          <DialogContent>
+            <Box display="flex" gap="32px" padding="16px">
+              {/* Área de imagem e nome */}
+              <Box display="flex" flexDirection="column" alignItems="center" width="33%" gap="16px">
+                <div style={{ width: 200, height: 200, borderRadius: 8, border: '2px solid #e0e0e0', overflow: 'hidden' }}>
+                  {image && <img src={image} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                </div>
+                <Button variant="contained" component="label" fullWidth>
+                  Escolher Imagem
+                  <input type="file" hidden accept="image/*" onChange={handleImageChange} />
+                </Button>
+                <TextField fullWidth label="Nome" value={name} onChange={(e) => setName(e.target.value)} />
+              </Box>
+
+              {/* Campos de entrada e cálculo */}
+              <Box display="flex" flexDirection="column" width="67%">
+                <Stack spacing={2}>
+                  <TextField label="Valor Gasto" type="number" value={formData.valorGasto} onChange={(e) => handleInputChange('valorGasto', e.target.value)} fullWidth />
+                  <TextField label="Visitas no Perfil" type="number" value={formData.visitaPerfil} onChange={(e) => handleInputChange('visitaPerfil', e.target.value)} fullWidth />
+                  <TextField label="Começar a Seguir" type="number" value={formData.comenzarSeguir} onChange={(e) => handleInputChange('comenzarSeguir', e.target.value)} fullWidth />
+                  <TextField label="Whatsapp Cliques" type="number" value={formData.whatsappCliques} onChange={(e) => handleInputChange('whatsappCliques', e.target.value)} fullWidth />
+
+                  <TextField label="Custo por Clique" value={`R$ ${formData.custoPorClique}`} InputProps={{ readOnly: true }} fullWidth />
+                  <TextField label="Custo por Conversa" value={`R$ ${formData.custoPorConversa}`} InputProps={{ readOnly: true }} fullWidth />
+                  <TextField label="Custo por Seguidor" value={`R$ ${formData.custoPorSeguidor}`} InputProps={{ readOnly: true }} fullWidth />
+                  <TextField label="Conversão Perfil > Conversa (%)" value={`${formData.conversaoPerfil}%`} InputProps={{ readOnly: true }} fullWidth />
+                </Stack>
+
+                <Button
+                  variant="contained"
+                  onClick={() => setIsActive(!isActive)}
+                  sx={{
+                    mt: 2,
+                    bgcolor: isActive ? 'green' : 'red',
+                    color: 'white'
+                  }}
+                >
+                  {isActive ? 'Ativo' : 'Inativo'}
+                </Button>
+              </Box>
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>Cancelar</Button>
+            <Button onClick={handleSave}>Salvar</Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Box>
   );
